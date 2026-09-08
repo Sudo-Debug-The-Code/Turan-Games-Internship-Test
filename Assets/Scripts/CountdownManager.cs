@@ -7,7 +7,7 @@ public class CountdownManager : MonoBehaviour
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private CarControl carControl;
-    [SerializeField] private Rigidbody carRigidbody;
+    [SerializeField] private Rigidbody rb;
     [SerializeField] private TimeManager timeManager;
 
     [Header("Animation")]
@@ -18,7 +18,7 @@ public class CountdownManager : MonoBehaviour
 
     private void Start()
     {
-        originalConstraints = carRigidbody.constraints;
+        originalConstraints = rb.constraints;
 
         StartCoroutine(Countdown());
     }
@@ -28,7 +28,7 @@ public class CountdownManager : MonoBehaviour
         carControl.SetControlsEnabled(false);
         timeManager.SetTimerRunning(false);
 
-        carRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
 
         countdownPanel.SetActive(true);
         countdownText.gameObject.SetActive(true);
@@ -40,7 +40,7 @@ public class CountdownManager : MonoBehaviour
 
         countdownPanel.SetActive(false);
 
-        carRigidbody.constraints = originalConstraints;
+        rb.constraints = originalConstraints;
 
         carControl.SetControlsEnabled(true);
         timeManager.SetTimerRunning(true);
