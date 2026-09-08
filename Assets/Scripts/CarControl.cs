@@ -21,6 +21,8 @@ public class CarControl : MonoBehaviour
     [SerializeField] private float maxSteeringAngle = 30f;
     [SerializeField] private TrailRenderer[] BlackStuff = new TrailRenderer[2];
     [SerializeField] private ParticleSystem[] Smoke = new ParticleSystem[2];
+    [SerializeField] private InputActionReference brakeAction;
+    [SerializeField] private float brakeStrength = 5f;
     private float currentSteeringAngle;
 
     [Header("Suspension")]
@@ -50,6 +52,7 @@ public class CarControl : MonoBehaviour
 
     private float throttleInput;
     private float steeringInput;
+    private float brakeInput;
 
     private bool[] wheelIsGrounded;
     private bool isAllGrounded = false;
@@ -65,12 +68,14 @@ public class CarControl : MonoBehaviour
     {
         throttleAction.action.Enable();
         steeringAction.action.Enable();
+        brakeAction.action.Enable();
     }
 
     private void OnDisable()
     {
         throttleAction.action.Disable();
         steeringAction.action.Disable();
+        brakeAction.action.Disable();
     }
 
     private void Update()
@@ -84,6 +89,7 @@ public class CarControl : MonoBehaviour
 
         throttleInput = throttleAction.action.ReadValue<float>();
         steeringInput = steeringAction.action.ReadValue<float>();
+        brakeInput = brakeAction.action.ReadValue<float>();
     }
     private void FixedUpdate()
     {
@@ -100,6 +106,7 @@ public class CarControl : MonoBehaviour
             Deceleration();
             Turn();
             SidewaysDrag();
+            Brake();
         }
 
         RotateWheels();
@@ -157,14 +164,19 @@ public class CarControl : MonoBehaviour
 
     private void VFX()
     {
-        if(isAllGrounded && Mathf.Abs(CurrentCarVelocity.x) > MinimumSideVelocitySmoke)
+        bool drifting = Mathf.Abs(CurrentCarVelocity.x) > MinimumSideVelocitySmoke;
+        bool braking = brakeInput > 0 && Mathf.Abs(CurrentCarVelocity.z) > 2f;
+
+        if (isAllGrounded && (drifting || braking))
         {
             DriftSound.mute = false;
+
             foreach (TrailRenderer trail in BlackStuff)
             {
                 trail.emitting = true;
             }
-            foreach(ParticleSystem particle in Smoke)
+
+            foreach (ParticleSystem particle in Smoke)
             {
                 particle.Play();
             }
@@ -172,10 +184,12 @@ public class CarControl : MonoBehaviour
         else
         {
             DriftSound.mute = true;
+
             foreach (TrailRenderer trail in BlackStuff)
             {
                 trail.emitting = false;
             }
+
             foreach (ParticleSystem particle in Smoke)
             {
                 particle.Stop();
@@ -274,5 +288,13 @@ public class CarControl : MonoBehaviour
     public void SetControlsEnabled(bool enabled)
     {
         controlsEnabled = enabled;
+    }
+
+    private void Brake()
+    {
+        if (brakeInput > 0)
+        {
+            rb.AddForceAtPosition(-transform.forward * CurrentCarVelocity.z * brakeStrength * brakeInput, accelerationPoint.position, ForceMode.Acceleration);
+        }
     }
 }

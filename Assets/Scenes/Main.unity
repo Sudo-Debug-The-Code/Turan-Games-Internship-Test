@@ -15577,6 +15577,8 @@ MonoBehaviour:
   Smoke:
   - {fileID: 1054688780}
   - {fileID: 104755485}
+  brakeAction: {fileID: -8267279007271278769, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  brakeStrength: 5
   RestSpringDistance: 0.6
   SpringStiffness: 30000
   SpringOffset: 0.3
